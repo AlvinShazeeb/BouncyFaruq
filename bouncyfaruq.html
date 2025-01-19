@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Physics Simulator</title>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f0f0f0;
+    }
+    .big-container {
+      width: 90vw;
+      height: 90vh;
+      background-color: lightgray;
+      position: relative;
+      overflow: hidden;
+    }
+    .small-container {
+      width: 100px;
+      height: 100px;
+      background-color: white;
+      position: absolute;
+      border: 2px solid black;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+  <div class="big-container">
+    <div class="small-container" id="small-box"> <img src="Frq.jpg" alt="Box Image" style="width: 100%; height: 100%; object-fit: cover;border-radius: 50%;"></div>
+  </div>
+  <script>
+    const box = document.getElementById('small-box');
+    const bigContainer = document.querySelector('.big-container');
+    
+    const boxSize = 100; // Size of the small container
+    let boxPosition = { x: 0, y: 0 }; // Initial position of the box
+    let boxVelocity = { x: 0, y: 0 }; // Velocity of the box
+    
+    // Physics properties
+    const gravityFactor = 0.6; // Adjusts how strongly the tilt affects the movement
+    const friction = 0.78; // Low friction for smoother motion
+    const bounceFactor = 0.9; // Slight bounciness for smooth rebounds
+    
+    // Update position based on device orientation
+    window.addEventListener('deviceorientation', (event) => {
+      // Get the tilt values
+      let tiltX = event.beta; // X-axis tilt (front-back)
+      let tiltY = event.gamma; // Y-axis tilt (left-right)
+      
+      // Simulate gravity movement (tilt-based)
+      let moveX = tiltY * gravityFactor;
+      let moveY = tiltX * gravityFactor;
+      
+      // Apply velocity and friction for smooth sliding
+      boxVelocity.x += moveX;
+      boxVelocity.y += moveY;
+      
+      boxVelocity.x *= friction;
+      boxVelocity.y *= friction;
+      
+      // Update the box position based on velocity
+      boxPosition.x += boxVelocity.x;
+      boxPosition.y += boxVelocity.y;
+      
+      // Bouncing logic for box within container bounds
+      if (boxPosition.x <= 0 || boxPosition.x >= bigContainer.clientWidth - boxSize) {
+        boxVelocity.x = -boxVelocity.x * bounceFactor; // Reverse velocity and apply bounciness
+      }
+      
+      if (boxPosition.y <= 0 || boxPosition.y >= bigContainer.clientHeight - boxSize) {
+        boxVelocity.y = -boxVelocity.y * bounceFactor; // Reverse velocity and apply bounciness
+      }
+      
+      // Ensure box stays inside bounds
+      boxPosition.x = Math.max(0, Math.min(bigContainer.clientWidth - boxSize, boxPosition.x));
+      boxPosition.y = Math.max(0, Math.min(bigContainer.clientHeight - boxSize, boxPosition.y));
+      
+      // Apply the new position to the box
+      box.style.transform = `translate(${boxPosition.x}px, ${boxPosition.y}px)`;
+    });
+  </script>
+</body>
+</html>
